@@ -36,6 +36,13 @@ struct Rectangle{
             return "[FATAL]Invalid Polygon Pointer!";
         }
     }
+    py::list get(){
+        if(p){
+            return p -> get();
+        }
+        py::list empty;
+        return empty;
+    }
     std::shared_ptr<Polygon> p;
 };
 

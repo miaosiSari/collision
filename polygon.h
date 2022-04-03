@@ -15,21 +15,23 @@ struct Polygon: public Shape{
     std::vector<Vertex2d> vertices;
     //matrix是一个2*(vertices.size())类型的矩阵。每一列是一个顶点, 顶点顺序和vertices中的顶点顺序相同, 必须保证是逆时针(Counter Clockwise, CCW)
     Eigen::MatrixXf* matrix;
+    py::list vertices_pylist;
+    bool is_vertices_pylist_initialized;
     //vertices以逆时针方向初始化
-    Polygon(std::vector<Vertex2d>& vertices):Shape(CONVEXPOLYGON), vertices(vertices){
+    Polygon(std::vector<Vertex2d>& vertices):Shape(CONVEXPOLYGON), vertices(vertices), is_vertices_pylist_initialized(false){
         matrix = new (std::nothrow) Eigen::MatrixXf(2, this->vertices.size());
     }
-    Polygon(std::vector<Vertex2d>&& vertices):Shape(CONVEXPOLYGON),vertices(std::move(vertices)){
+    Polygon(std::vector<Vertex2d>&& vertices):Shape(CONVEXPOLYGON),vertices(std::move(vertices)), is_vertices_pylist_initialized(false){
         matrix = new (std::nothrow) Eigen::MatrixXf(2, this->vertices.size());
     }
-    Polygon(py::list vertices):Shape(CONVEXPOLYGON){
-        for (py::handle obj : vertices) {  // iterators!
+    Polygon(py::list vertices_pylist):Shape(CONVEXPOLYGON), vertices_pylist(vertices_pylist), is_vertices_pylist_initialized(true){
+        for (py::handle obj : vertices_pylist) {  // iterators!
             py::tuple t = obj.cast<py::tuple>();
             (this -> vertices).emplace_back(t[0].cast<float>(), t[1].cast<float>());
         }
         matrix = new (std::nothrow) Eigen::MatrixXf(2, this->vertices.size());
     }
-    Polygon(Eigen::MatrixXf&& verticesmatrix, float biasx, float biasy): Shape(CONVEXPOLYGON){
+    Polygon(Eigen::MatrixXf&& verticesmatrix, float biasx, float biasy): Shape(CONVEXPOLYGON), is_vertices_pylist_initialized(false){
         for(int i = 0; i < verticesmatrix.cols(); ++i){
             vertices.emplace_back(verticesmatrix(0, i) + biasx, verticesmatrix(1, i) + biasy);
         }
@@ -113,6 +115,15 @@ struct Polygon: public Shape{
             ++index; 
         }   
         return returnstr;
+    }
+
+    py::list get(){
+        if(is_vertices_pylist_initialized){return vertices_pylist;}
+        py::list newlist;
+        for(const Vertex2d& v: vertices){
+            newlist.append(py::make_tuple(v[0], v[1]));
+        }
+        return newlist;
     }
 
 private:
