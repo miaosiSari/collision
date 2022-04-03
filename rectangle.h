@@ -32,9 +32,8 @@ struct Rectangle{
     std::string __str__() const{
         if(p){
             return p -> __str__();
-        }else{
-            return "[FATAL]Invalid Polygon Pointer!";
         }
+        return "[FATAL]Invalid Polygon Pointer!";
     }
     py::list get(){
         if(p){
