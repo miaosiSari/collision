@@ -20,11 +20,13 @@ PYBIND11_MODULE(collision, m){
     py::class_<Polygon>(m, "Polygon")
         .def(py::init<py::list>())
         .def("__str__", &Polygon::__str__)
-        .def("get", &Polygon::get);
+        .def("get", &Polygon::get)
+        .def("collide", &Polygon::collide);
     py::class_<Rectangle>(m, "Rect")
         .def(py::init<float, float, float, float, float>())
         .def("__str__", &Rectangle::__str__)
-        .def("get", &Rectangle::get);
+        .def("get", &Rectangle::get)
+        .def("collide", &Rectangle::collide);
     py::class_<Vars>(m, "Vars")
         .def(py::init<>())
         .def_readonly("pi", &Vars::_pi)
